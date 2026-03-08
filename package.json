@@ -1,0 +1,23 @@
+{
+  "name": "notocities-backend",
+  "version": "1.0.0",
+  "description": "backend for notocities",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/noto173/notocities-backend.git"
+  },
+  "author": "notoriginal",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/noto173/notocities-backend/issues"
+  },
+  "homepage": "https://github.com/noto173/notocities-backend#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}
