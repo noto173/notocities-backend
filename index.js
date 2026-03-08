@@ -26,14 +26,28 @@ app.get('/notocities/view', (req, res) => {
 });
 
 app.post('/notocities/api/upload', (req, res) => {
+    let name = req.body.name.trim();
     console.log("Recieved upload request");
-    const relative = path.relative(`${disk}/templates`, `${disk}/templates/${req.body.name}.html`);
+    const relative = path.relative(`${disk}/templates`, `${disk}/templates/${name}.html`);
     if (!relative || relative.startsWith('..') || path.isAbsolute(relative)) {
         console.log("Failed");
         res.send(JSON.stringify(-1));
         return;
+    } else if (name == "hello") {
+        console.log("Hardcoded site attempted to be overridden");
+        res.send(JSON.stringify(-2));
+        return;
+    } else if (fs.existsSync(`${disk}/templates/${name}.html`) && fs.existsSync(`${disk}/templates/${name}.txt`)) {
+        if (fs.readFileSync(`${disk}/templates/${name}.txt`) != req.body.pass) {
+            console.log("Tried to edit site; wrong pass");
+            res.send(JSON.stringify(-3));
+            return;
+        }
+    } else if (!fs.existsSync(`${disk}/templates/${name}.txt`) && !(req.body.pass === "" || req.body.pass === null)) {
+        console.log(fs.existsSync(`${disk}/templates/${name}.html`) ? "Added password to a site" : "Made password-protected site");
+        fs.writeFileSync(`${disk}/templates/${name}.txt`, req.body.pass);
     }
-    writePage(req.body.name, req.body.data);
+    fs.writeFileSync(`${disk}/templates/${name}.html`, req.body.data);
     res.send(JSON.stringify(69));
 });
 
@@ -49,9 +63,12 @@ app.listen(port, () => {
 });
 
 function listPages() {
-    return fs.readdirSync(`${disk}/templates`).map(dir => dir.substr(0, dir.length - 5));
-}
-
-function writePage(name, data) {
-    return fs.writeFileSync(`${disk}/templates/${name}.html`, data);
+    let files = fs.readdirSync(`${disk}/templates`)
+    let pages = [];
+    files.forEach(file => {
+        if (file.substr(file.length - 5, 5) === ".html") {
+            pages.push(file.substr(0, file.length - 5));
+        }
+    });
+    return pages;
 }
