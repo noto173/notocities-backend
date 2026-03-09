@@ -6,7 +6,7 @@ const cors = require("cors");
 const development = process.env.NODE_ENV !== "production";
 const disk = development ? "./disk" : "/var/data";
 app.use(cors(development ? null : {origin: "https://noto173.net"}));
-app.use(express.json());
+app.use(express.json({"limit":"100mb"}));
 app.use(express.urlencoded());
 const port = process.env.PORT || 3000;
 
