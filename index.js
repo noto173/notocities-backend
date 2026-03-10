@@ -69,9 +69,9 @@ function listPages() {
     const files = fs.readdirSync(`${disk}/templates`)
     let pages = [];
     files.forEach(file => {
-        if (file.substring(file.length - 5, file.length - 1) === ".html") {
-            const name = file.substring(0, file.length - 5);
-            pages.push({name: name, author: (file.existsSync(`${disk}/templates/${name}.user`) ? file.readFileSync(`${disk}/templates/${name}.user`) : "Unknown")});
+        if (file.substring(file.length - 5) === ".html") {
+            const fname = file.substring(0, file.length - 5);
+            pages.push({name: fname, author: (file.existsSync(`${disk}/templates/${fname}.user`) ? file.readFileSync(`${disk}/templates/${fname}.user`) : "Unknown")});
         }
     });
     return pages;
