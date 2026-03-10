@@ -46,7 +46,8 @@ app.post('/notocities/api/upload', (req, res) => {
     } else if (!fs.existsSync(`${disk}/templates/${name}.txt`) && !(req.body.pass === "" || req.body.pass === null)) {
         console.log(fs.existsSync(`${disk}/templates/${name}.html`) ? "Added password to a site" : "Made password-protected site");
         fs.writeFileSync(`${disk}/templates/${name}.txt`, req.body.pass);
-    } else if (!fs.existsSync(`${disk}/templates/${name}.user`) && !(req.body.user === "" || req.body.user === null)) {
+    }
+    if (!fs.existsSync(`${disk}/templates/${name}.user`) && !(req.body.user === "" || req.body.user === null)) {
         console.log(fs.existsSync(`${disk}/templates/${name}.html`) ? "Added username to a site" : "Made site with username attached");
         fs.writeFileSync(`${disk}/templates/${name}.user`, req.body.user);
     }
