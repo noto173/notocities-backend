@@ -46,6 +46,9 @@ app.post('/notocities/api/upload', (req, res) => {
     } else if (!fs.existsSync(`${disk}/templates/${name}.txt`) && !(req.body.pass === "" || req.body.pass === null)) {
         console.log(fs.existsSync(`${disk}/templates/${name}.html`) ? "Added password to a site" : "Made password-protected site");
         fs.writeFileSync(`${disk}/templates/${name}.txt`, req.body.pass);
+    } else if (!fs.existsSync(`${disk}/templates/${name}.user`) && !(req.body.user === "" || req.body.user === null)) {
+        console.log(fs.existsSync(`${disk}/templates/${name}.html`) ? "Added username to a site" : "Made site with username attached");
+        fs.writeFileSync(`${disk}/templates/${name}.user`, req.body.user);
     }
     fs.writeFileSync(`${disk}/templates/${name}.html`, req.body.data);
     res.send(JSON.stringify(69));
@@ -63,11 +66,12 @@ app.listen(port, () => {
 });
 
 function listPages() {
-    let files = fs.readdirSync(`${disk}/templates`)
+    const files = fs.readdirSync(`${disk}/templates`)
     let pages = [];
     files.forEach(file => {
-        if (file.substr(file.length - 5, 5) === ".html") {
-            pages.push(file.substr(0, file.length - 5));
+        if (file.substring(file.length - 5, file.length - 1) === ".html") {
+            const name = file.substring(0, file.length - 5);
+            pages.push({name: name, author: (file.existsSync(`${disk}/templates/${name}.user`) ? file.readFileSync(`${disk}/templates/${name}.user`) : "Unknown")});
         }
     });
     return pages;
