@@ -72,7 +72,7 @@ function listPages() {
     files.forEach(file => {
         if (file.substring(file.length - 5) === ".html") {
             const fname = file.substring(0, file.length - 5);
-            pages.push({name: fname, author: (fs.existsSync(`${disk}/templates/${fname}.user`) ? fs.readFileSync(`${disk}/templates/${fname}.user`) : "Unknown")});
+            pages.push({name: fname, author: (fs.existsSync(`${disk}/templates/${fname}.user`) ? fs.readFileSync(`${disk}/templates/${fname}.user`).toString('utf-8') : "Unknown")});
         }
     });
     return pages;
