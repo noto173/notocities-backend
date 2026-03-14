@@ -83,13 +83,19 @@ const wss = new WebSocket.Server({server, path: '/notochat/ws'});
 
 console.log('WebSocket server is running');
 
+let chat_logs = [];
+
 // Connection event handler
 wss.on('connection', (ws) => {
 	console.log('New client connected');
+    chat_logs.forEach(message => {
+        ws.send(message.toString("UTF-8"));
+    });
 
 	// Message event handler
 	ws.on('message', (message) => {
 		console.log(`Received message ${message}`);
+        chat_logs.push(message);
 		// ws.send(message.toString("UTF-8"));
         wss.clients.forEach(client => {
             if (client.readyState === WebSocket.OPEN) {
