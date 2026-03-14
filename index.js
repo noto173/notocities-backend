@@ -1,7 +1,9 @@
 const fs = require('fs');
 const path = require('path');
+const { createServer } = require('http');
 const express = require('express');
 const app = express();
+const server = createServer(app);
 const cors = require("cors");
 const development = process.env.NODE_ENV !== "production";
 const disk = development ? "./disk" : "/var/data";
@@ -62,10 +64,6 @@ if (!fs.existsSync(`${disk}/templates`)) {
     fs.writeFileSync(`${disk}/templates/hello.html`, `<!DOCTYPE html><title>hello</title><h1>hello</h1>this is a test site.`);
 }
 
-app.listen(port, () => {
-    console.log(`App running on port ${port}`);
-});
-
 function listPages() {
     const files = fs.readdirSync(`${disk}/templates`)
     let pages = [];
@@ -79,10 +77,11 @@ function listPages() {
 }
 
 const WebSocket = require('ws');
+const { create } = require('domain');
 
-const wss = new WebSocket.Server({ port: 8080 });
+const wss = new WebSocket.Server({server, path: '/notochat/ws'});
 
-console.log('WebSocket server is running on ws://localhost:8080');
+console.log('WebSocket server is running');
 
 // Connection event handler
 wss.on('connection', (ws) => {
@@ -99,3 +98,7 @@ wss.on('connection', (ws) => {
 		console.log('Client disconnected');
 	});
 }); 
+
+server.listen(port, () => {
+    console.log(`App running on port ${port}`);
+});
