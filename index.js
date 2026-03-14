@@ -84,7 +84,7 @@ const wss = new WebSocket.Server({server, path: '/notochat/ws'});
 
 console.log('WebSocket server is running');
 
-let chat_logs = JSON.parse(fs.existsSync(`${disk}/chatlog.json`) ? fs.readFileSync(`${disk}/chatlog.json`) : []);
+let chat_logs = JSON.parse(fs.existsSync(`${disk}/chatlog.json`) ? fs.readFileSync(`${disk}/chatlog.json`) : "[]");
 
 app.get("/notochat/log", (req, res) => {
     res.send(JSON.stringify(chat_logs));
