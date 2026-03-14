@@ -18,6 +18,7 @@
   "homepage": "https://github.com/noto173/notocities-backend#readme",
   "dependencies": {
     "cors": "^2.8.6",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "ws": "^8.19.0"
   }
 }
