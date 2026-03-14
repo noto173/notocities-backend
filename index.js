@@ -90,7 +90,12 @@ wss.on('connection', (ws) => {
 	// Message event handler
 	ws.on('message', (message) => {
 		console.log(`Received message ${message}`);
-		ws.send(message.toString("UTF-8"));
+		// ws.send(message.toString("UTF-8"));
+        wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(message.toString("UTF-8"));
+            }
+        });
 	});
 
 	// Close event handler
