@@ -84,7 +84,7 @@ const wss = new WebSocket.Server({server, path: '/notochat/ws'});
 
 console.log('WebSocket server is running');
 
-let chat_logs = [];
+let chat_logs = JSON.parse(fs.existsSync(`${disk}/chatlog.json`) ? fs.readFileSync(`${disk}/chatlog.json`) : []);
 
 app.get("/notochat/log", (req, res) => {
     res.send(JSON.stringify(chat_logs));
@@ -98,6 +98,7 @@ wss.on('connection', (ws) => {
 	ws.on('message', (message) => {
 		console.log(`Received message ${message}`);
         chat_logs.push(JSON.parse(message));
+        fs.writeFileSync(`${disk}/chatlog.json`, JSON.stringify(chat_logs));
 		// ws.send(message.toString("UTF-8"));
         wss.clients.forEach(client => {
             if (client.readyState === WebSocket.OPEN) {
