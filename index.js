@@ -84,11 +84,25 @@ const wss = new WebSocket.Server({server, path: '/notochat/ws'});
 
 console.log('WebSocket server is running');
 
-let chat_logs = JSON.parse(fs.existsSync(`${disk}/chatlog.json`) ? fs.readFileSync(`${disk}/chatlog.json`) : "[]");
+let chat_logs = fs.existsSync(`${disk}/chatlog.json`) ? JSON.parse(fs.readFileSync(`${disk}/chatlog.json`)) : [];
+
+let userdb = fs.existsSync(`${disk}/users.json`) ? JSON.parse(fs.readFileSync(`${disk}/users.json`)) : {};
+
+const view_log_pass_exists = fs.existsSync(`${disk}/logpass.txt`);
+const view_log_pass = view_log_pass_exists ? fs.readFileSync(`${disk}/logpass.txt`) : null;
 
 app.get("/notochat/log", (req, res) => {
+    if (!(req.query.pass == view_log_pass && view_log_pass_exists)) {
+        res.send("you're not a admin you idot");
+        return;
+    }
     res.send(JSON.stringify(chat_logs));
 });
+
+function maxlength(string, max) {
+    string = string || "".toString("UTF-8");
+    return string.substring(0, Math.min(string.length, max));
+}
 
 // Connection event handler
 wss.on('connection', (ws) => {
@@ -97,12 +111,33 @@ wss.on('connection', (ws) => {
 	// Message event handler
 	ws.on('message', (message) => {
 		console.log(`Received message ${message}`);
-        chat_logs.push(JSON.parse(message));
+        // DO NOT TRUST USER INPUT!!!!!
+        message = JSON.parse(message);
+        message = {username: maxlength(message.username, 20), password: maxlength(message.password, 20), message_body: maxlength(message.message_body, 400)}
+        console.log(JSON.stringify([message, userdb]));
+        if (message.username in userdb) {
+            if (message.password !== userdb[message.username]) {
+                console.log("Failed to send a message: wrong password.");
+                return;
+            }
+        } else {
+            if (message.username !== "") {
+                if (message.password !== "") {
+                    userdb[message.username] = message.password;
+                    fs.writeFileSync(`${disk}/users.json`, JSON.stringify(userdb));
+                } else {
+                    console.log("Failed to send a message: did not attach password when creating a new user.");
+                    return;
+                }
+            }
+        }
+        message.password = undefined;
+        chat_logs.push(message);
         fs.writeFileSync(`${disk}/chatlog.json`, JSON.stringify(chat_logs));
 		// ws.send(message.toString("UTF-8"));
         wss.clients.forEach(client => {
             if (client.readyState === WebSocket.OPEN) {
-                client.send(message.toString("UTF-8"));
+                client.send(JSON.stringify(message));
             }
         });
 	});
