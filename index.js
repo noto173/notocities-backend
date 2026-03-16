@@ -113,12 +113,16 @@ wss.on('connection', (ws) => {
 		console.log(`Received message ${message}`);
         // DO NOT TRUST USER INPUT!!!!!
         message = JSON.parse(message);
-        message = {username: maxlength(message.username, 20), password: maxlength(message.password, 20), message_body: maxlength(message.message_body, 400)}
-        console.log(JSON.stringify([message, userdb]));
+        message = {username: maxlength(message.username, 20), password: maxlength(message.password, 20), message_body: maxlength(message.message_body, 400), verified: false};
         if (message.username in userdb) {
-            if (message.password !== userdb[message.username]) {
+            if (message.password === "") {
+                console.log("Sent message as an unverified user.");
+            } else if (message.password !== userdb[message.username]) {
                 console.log("Failed to send a message: wrong password.");
                 return;
+            } else {
+                console.log("Verified!");
+                message.verified = true;
             }
         } else {
             if (message.username !== "") {
@@ -126,8 +130,7 @@ wss.on('connection', (ws) => {
                     userdb[message.username] = message.password;
                     fs.writeFileSync(`${disk}/users.json`, JSON.stringify(userdb));
                 } else {
-                    console.log("Failed to send a message: did not attach password when creating a new user.");
-                    return;
+                    console.log("Sent message as an unverified user.");
                 }
             }
         }
