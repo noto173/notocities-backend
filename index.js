@@ -110,11 +110,11 @@ function maxlength(string, max) {
 wss.on('connection', (ws, req) => {
 	console.log('New client connected');
     ws.id = req.headers["sec-websocket-key"];
-    ws.send(JSON.stringify({username: "System", message_body: `${online} people are online right now.`, verified: true}));
     online++;
+    ws.send(JSON.stringify({username: "System", message_body: `${online} people are online right now.`, verified: true}));
     wss.clients.forEach(client => {
         if (client.id !== ws.id) {
-            client.send(JSON.stringify({username: "System", message_body: `Someone has joined. ${online} people online now.`, verified: true}));
+            client.send(JSON.stringify({username: "System", message_body: `Someone has joined. ${online - 1} people online now.`, verified: true}));
         }
     });
 
