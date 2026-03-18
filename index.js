@@ -106,22 +106,15 @@ function maxlength(string, max) {
     return string.substring(0, Math.min(string.length, max));
 }
 
-
-wss.getUniqueID = () => {
-    let s4 = () => {
-        return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-    }
-    return s4() + s4() + '-' + s4();
-};
-
 // Connection event handler
-wss.on('connection', (ws) => {
+wss.on('connection', (ws, req) => {
 	console.log('New client connected');
-    ws.id = wss.getUniqueID();
-    ws.send({username: "System", message_body: `${online} people are online right now.`, verified: true});
+    ws.id = req.headers["sec-websocket-key"];
+    ws.send(JSON.stringify({username: "System", message_body: `${online} people are online right now.`, verified: true}));
+    online++;
     wss.clients.forEach(client => {
         if (client.id !== ws.id) {
-            ws.send({username: "System", message_body: "Someone has joined.", verified: true});
+            client.send(JSON.stringify({username: "System", message_body: `Someone has joined. ${online} people online now.`, verified: true}));
         }
     });
 
@@ -170,8 +163,9 @@ wss.on('connection', (ws) => {
 	// Close event handler
 	ws.on('close', () => {
 		console.log('Client disconnected');
+        online--;
         wss.clients.forEach(client => {
-            ws.send({username: "System", message_body: "Someone has left.", verified: true});
+            client.send(JSON.stringify({username: "System", message_body: `Someone has left. ${online} people online now.`, verified: true}));
         });
 	});
 }); 
