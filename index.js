@@ -88,6 +88,8 @@ let chat_logs = fs.existsSync(`${disk}/chatlog.json`) ? JSON.parse(fs.readFileSy
 
 let userdb = fs.existsSync(`${disk}/users.json`) ? JSON.parse(fs.readFileSync(`${disk}/users.json`)) : {};
 
+let online = 0;
+
 const view_log_pass_exists = fs.existsSync(`${disk}/logpass.txt`);
 const view_log_pass = view_log_pass_exists ? fs.readFileSync(`${disk}/logpass.txt`) : null;
 
@@ -104,9 +106,24 @@ function maxlength(string, max) {
     return string.substring(0, Math.min(string.length, max));
 }
 
+
+wss.getUniqueID = () => {
+    let s4 = () => {
+        return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+    }
+    return s4() + s4() + '-' + s4();
+};
+
 // Connection event handler
 wss.on('connection', (ws) => {
 	console.log('New client connected');
+    ws.id = wss.getUniqueID();
+    ws.send({username: "System", message_body: `${online} people are online right now.`, verified: true});
+    wss.clients.forEach(client => {
+        if (client.id !== ws.id) {
+            ws.send({username: "System", message_body: "Someone has joined.", verified: true});
+        }
+    });
 
 	// Message event handler
 	ws.on('message', (message) => {
@@ -114,6 +131,10 @@ wss.on('connection', (ws) => {
         // DO NOT TRUST USER INPUT!!!!!
         message = JSON.parse(message);
         message = {username: maxlength(message.username, 20), password: maxlength(message.password, 20), message_body: maxlength(message.message_body, 400), verified: false};
+        if (message.username === "System" && message.password !== "") {
+            console.log("Attempted to fake system message!");
+            return;
+        }
         if (message.username in userdb) {
             if (message.password === "") {
                 console.log("Sent message as an unverified user.");
@@ -129,6 +150,7 @@ wss.on('connection', (ws) => {
                 if (message.password !== "") {
                     userdb[message.username] = message.password;
                     fs.writeFileSync(`${disk}/users.json`, JSON.stringify(userdb));
+                    message.verified = true;
                 } else {
                     console.log("Sent message as an unverified user.");
                 }
@@ -148,6 +170,9 @@ wss.on('connection', (ws) => {
 	// Close event handler
 	ws.on('close', () => {
 		console.log('Client disconnected');
+        wss.clients.forEach(client => {
+            ws.send({username: "System", message_body: "Someone has left.", verified: true});
+        });
 	});
 }); 
 
