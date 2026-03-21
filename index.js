@@ -128,6 +128,7 @@ wss.on('connection', (ws, req) => {
             console.log("Attempted to fake system message!");
             return;
         }
+        userdb = fs.existsSync(`${disk}/users.json`) ? JSON.parse(fs.readFileSync(`${disk}/users.json`)) : {};
         if (message.username in userdb) {
             if (message.password === "") {
                 console.log("Sent message as an unverified user.");
