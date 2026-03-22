@@ -93,6 +93,10 @@ let online = 0;
 const view_log_pass_exists = fs.existsSync(`${disk}/logpass.txt`);
 const view_log_pass = view_log_pass_exists ? fs.readFileSync(`${disk}/logpass.txt`) : null;
 
+app.get("/GETBACKUP", (req, res) => {
+    res.sendFile(`${disk}/data.tar.gz`);
+})
+
 app.get("/notochat/log", (req, res) => {
     if (!(req.query.pass == view_log_pass && view_log_pass_exists)) {
         res.send("you're not a admin you idot");
